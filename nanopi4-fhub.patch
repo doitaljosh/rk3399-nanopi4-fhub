@@ -1,0 +1,321 @@
+diff -r '--exclude=.git' kernel-rockchip/arch/arm64/boot/dts/rockchip/rk3399-nanopi4-common.dtsi uboot-rockchip/kernel-rockchip/arch/arm64/boot/dts/rockchip/rk3399-nanopi4-common.dtsi
+261c261
+< 		status = "disabled";
+---
+> 		status = "okay";
+353a354,359
+> 	
+> 	gp2y {
+> 		status = "okay";
+> 		compatible = "sharp,gp2y,rk3399-adc";
+> 		io-channels = <&saradc 2>;
+> 	};
+362c368
+< 			label = "status_led";
+---
+> 			label = "alive_led";
+365a372,383
+> 		led@2 {
+> 			gpios = <&gpio1 1 GPIO_ACTIVE_HIGH>;
+>                         label = "mic_off";
+> 		};
+> 		led@3 {
+> 			gpios = <&gpio1 3 GPIO_ACTIVE_HIGH>;
+>                         label = "mic_on";
+> 		};
+> 		led@4 {
+> 			gpios = <&gpio1 4 GPIO_ACTIVE_HIGH>;
+>                         label = "touchkey";
+> 		};
+849a868,920
+> 	i2c-scl-rising-time-ns = <160>;
+> 	i2c-scl-falling-time-ns = <30>;
+>         clock-frequency = <400000>;
+> 
+> 	atmel_mxt_ts@4a {
+> 		compatible = "atmel,atmel_mxt_ts";
+> 		reg = <0x4a>;
+> 		reset-gpios = <&gpio1 22 GPIO_ACTIVE_LOW>;
+> 		interrupt-parent = <&gpio1>;
+> 		interrupts = <0 IRQ_TYPE_EDGE_FALLING>;
+> 		pinctrl-names = "default";
+> 		pinctrl-0 = <&mxt_int>;
+> 	};
+> 
+> 	ilitek-i2c@41 {
+> 		compatible = "ilitek,i2c";
+> 		reg = <0x41>;
+> 		interrupt-parent = <&gpio1>;
+> 		interrupts = <0 IRQ_TYPE_EDGE_FALLING>;
+> 		ilitek,reset = <&gpio1 22 0x01>;
+> 		key_input_used = <0x01>;
+> 	};
+> 
+> };
+> 
+> &i2c3 {
+> 	status = "okay";
+> 	i2c-scl-rising-time-ns = <160>;
+>         i2c-scl-falling-time-ns = <30>;
+>         clock-frequency = <400000>;
+> 
+> 	apds9960: apds9960@39 {
+> 		compatible = "avago,apds9960";
+> 		reg = <0x39>;
+> 		interrupt-parent = <&gpio1>;
+> 		interrupts = <22 1>;
+> 	};
+> 
+> 	bmp280: bmp280@77 {
+> 		compatible = "bosch,bmp280";
+> 		reg = <0x77>;
+> 	};
+> 
+> 	mpu6050: mpu6050@68 {
+> 		compatible = "invensense,mpu6050";
+> 		reg = <0x36>;
+> 	};
+> 	
+> 	msp430: msp430@48 {
+> 		compatible = "ti,msp430";
+> 		reg = <0x48>;
+> 		msp430,reset = <&gpio1 21 1>;
+> 	};
+954c1025
+< 	enable-gpios = <&gpio4 29 GPIO_ACTIVE_HIGH>;
+---
+> 	enable-gpios = <&gpio1 18 GPIO_ACTIVE_HIGH>;
+1159a1231,1236
+> 	atmel_mxt_ts {
+> 		mxt_int: mxt-pinctrl {
+> 			rockchip,pins = <1 0 RK_FUNC_GPIO &pcfg_pull_up>;
+> 		};	
+> 	};
+> 
+1198c1275,1279
+< 			rockchip,pins = <0 13 RK_FUNC_GPIO &pcfg_pull_none>;
+---
+> 			rockchip,pins = 
+> 			<0 13 RK_FUNC_GPIO &pcfg_pull_none>,
+> 			<1 1 RK_FUNC_GPIO &pcfg_pull_down>,
+> 			<1 3 RK_FUNC_GPIO &pcfg_pull_down>,
+> 			<1 4 RK_FUNC_GPIO &pcfg_pull_down>;
+Only in uboot-rockchip/kernel-rockchip/arch/arm64/boot: Image.lz4
+Only in uboot-rockchip/kernel-rockchip/arch/arm64/configs: rk3399_nanopi4_fhub_defconfig
+diff -r '--exclude=.git' kernel-rockchip/block/partitions/check.c uboot-rockchip/kernel-rockchip/block/partitions/check.c
+38a39
+> #include "lgemmc.h"
+74a76,78
+> #endif
+> #ifdef CONFIG_LGEMMC_PARTITION
+> 	lgemmc_partition,	/* this must come before msdos */
+diff -r '--exclude=.git' kernel-rockchip/block/partitions/Kconfig uboot-rockchip/kernel-rockchip/block/partitions/Kconfig
+279a280,285
+> 	  
+> config LGEMMC_PARTITION
+> 	bool "LG DTV(EMMC partition tables) support" if PARTITION_ADVANCED
+> 	help
+> 	  Say Y here.
+> 	  
+Only in uboot-rockchip/kernel-rockchip/block/partitions: lgemmc.c
+Only in uboot-rockchip/kernel-rockchip/block/partitions: lgemmc.h
+diff -r '--exclude=.git' kernel-rockchip/block/partitions/Makefile uboot-rockchip/kernel-rockchip/block/partitions/Makefile
+23a24
+> obj-$(CONFIG_LGEMMC_PARTITION) += lgemmc.o
+Only in uboot-rockchip/kernel-rockchip/drivers/gpu/arm/mali400/mali: __malidrv_build_info.c
+Only in uboot-rockchip/kernel-rockchip/drivers/iio/pressure: bme280-i2c.h
+Only in uboot-rockchip/kernel-rockchip/drivers/input/touchscreen: ilitek.c
+Only in uboot-rockchip/kernel-rockchip/drivers/input/touchscreen: ilitek.h
+diff -r '--exclude=.git' kernel-rockchip/drivers/input/touchscreen/Kconfig uboot-rockchip/kernel-rockchip/drivers/input/touchscreen/Kconfig
+1170a1171,1174
+> 	
+> config TOUCHSCREEN_ILITEK_I2C
+> 	tristate "Ilitek I2C touchscreen"
+> 	depends on I2C
+diff -r '--exclude=.git' kernel-rockchip/drivers/input/touchscreen/Makefile uboot-rockchip/kernel-rockchip/drivers/input/touchscreen/Makefile
+104a105
+> obj-$(CONFIG_TOUCHSCREEN_ILITEK_I2C)	+= ilitek.o
+Only in uboot-rockchip/kernel-rockchip/drivers/input/touchscreen: Module.symvers
+Only in uboot-rockchip/kernel-rockchip/drivers/input/touchscreen: .tmp_versions
+Only in uboot-rockchip/kernel-rockchip/drivers/input/touchscreen: V5001C_metal_mesh_20161116.ili
+diff -r '--exclude=.git' kernel-rockchip/drivers/misc/Kconfig uboot-rockchip/kernel-rockchip/drivers/misc/Kconfig
+565a566,569
+> 	  
+> config MSP430
+> 	tristate "MSP430 driver"
+> 	default y
+diff -r '--exclude=.git' kernel-rockchip/drivers/misc/Makefile uboot-rockchip/kernel-rockchip/drivers/misc/Makefile
+63a64
+> obj-$(CONFIG_MSP430)		+= msp430i2041.o
+Only in uboot-rockchip/kernel-rockchip/drivers/misc: Module.symvers
+Only in uboot-rockchip/kernel-rockchip/drivers/misc: msp430i2041.c
+Only in uboot-rockchip/kernel-rockchip/drivers/misc: .tmp_versions
+diff -r '--exclude=.git' kernel-rockchip/drivers/net/wireless/ath/ath9k/hif_usb.c uboot-rockchip/kernel-rockchip/drivers/net/wireless/ath/ath9k/hif_usb.c
+61a62,63
+> 	  
+> 	{ USB_DEVICE(0x04e8, 0x20a5) }, /* Samsung Electronics Co., Ltd */
+Only in uboot-rockchip/kernel-rockchip/include/linux: lgemmc.h
+diff -r '--exclude=.git' kernel-rockchip/kernel/power/Kconfig uboot-rockchip/kernel-rockchip/kernel/power/Kconfig
+156a157,209
+> 	
+> config LG_SNAPSHOT_BOOT
+> 	bool "Support LG snapshot boot feature (based on mainline hibernation and swsusp features)"
+> 	depends on HIBERNATION
+> 	default n
+> 
+> config LG_SNAPSHOT_DENY_STATE
+> 	bool "Disable /sys/power/state for security reason"
+> 	depends on LG_SNAPSHOT_BOOT
+> 	default n
+> 	---help---
+> 	  disable /sys/power/state for security reason. please use /dev/lgsnap
+> 
+> config LG_SNAPSHOT_SECURE_BOOT
+> 	bool "Support LG secure boot for snapshot image"
+> 	depends on LG_SNAPSHOT_BOOT
+> 	default n
+> 	---help---
+> 	  LG has its own secure boot feature and snapshot image also should be
+> 	  verified by that feature with HW secure engine(SE) block.
+> 
+> config LG_HIBERNATION_HACK
+>        bool "Enable LG hibernation hack"
+>        depends on LG_SNAPSHOT_BOOT
+>        default n
+>        ---help---
+>          In case of LG snapshot boot, only read-only file-system can be included
+>          in the snapshot image because the image is created only once at first boot.
+> 
+>          However, original mainline hibernation feature needs to support read-write
+>          file-system by creating the image every time when the system goes to "power
+>          down" state. To support this, we need to add some hacks on the codes for
+>          LG snapshot boot.
+> 
+>          Also, in order to debug hibernation feature easily, some debug features
+>          will be added with this configuration.
+> 
+> config LG_CRC_UNCOMPRESS_DATA
+> 	bool "Support CRC check for uncompressed data"
+> 	depends on LG_HIBERNATION_HACK
+> 	default n
+> 
+> config LG_INSTANT_BOOT
+> 	bool "Enable LG instant boot"
+> 	depends on SUSPEND
+> 	default n
+> 
+> config LG_INSTANT_DENY_PM_TEST
+> 	bool "Disable /sys/power/pm_test for security reason"
+> 	depends on LG_INSTANT_BOOT && PM_DEBUG
+> 	default n
+> 	---help---
+> 	  disable /sys/power/pm_test for security reason.
+diff -r '--exclude=.git' kernel-rockchip/kernel/power/Makefile uboot-rockchip/kernel-rockchip/kernel/power/Makefile
+13a14,15
+> obj-$(CONFIG_LG_SNAPSHOT_BOOT)  += rawdev_snapshot_io.o
+> 
+Only in uboot-rockchip/kernel-rockchip/kernel/power: rawdev_snapshot_io.c
+Only in uboot-rockchip/kernel-rockchip/: logo.bmp.old
+Only in uboot-rockchip/kernel-rockchip/: logo_kernel.bmp.old
+diff -r '--exclude=.git' kernel-rockchip/scripts/dtc/include-prefixes/arm64/rockchip/rk3399-nanopi4-common.dtsi uboot-rockchip/kernel-rockchip/scripts/dtc/include-prefixes/arm64/rockchip/rk3399-nanopi4-common.dtsi
+261c261
+< 		status = "disabled";
+---
+> 		status = "okay";
+353a354,359
+> 	
+> 	gp2y {
+> 		status = "okay";
+> 		compatible = "sharp,gp2y,rk3399-adc";
+> 		io-channels = <&saradc 2>;
+> 	};
+362c368
+< 			label = "status_led";
+---
+> 			label = "alive_led";
+365a372,383
+> 		led@2 {
+> 			gpios = <&gpio1 1 GPIO_ACTIVE_HIGH>;
+>                         label = "mic_off";
+> 		};
+> 		led@3 {
+> 			gpios = <&gpio1 3 GPIO_ACTIVE_HIGH>;
+>                         label = "mic_on";
+> 		};
+> 		led@4 {
+> 			gpios = <&gpio1 4 GPIO_ACTIVE_HIGH>;
+>                         label = "touchkey";
+> 		};
+849a868,920
+> 	i2c-scl-rising-time-ns = <160>;
+> 	i2c-scl-falling-time-ns = <30>;
+>         clock-frequency = <400000>;
+> 
+> 	atmel_mxt_ts@4a {
+> 		compatible = "atmel,atmel_mxt_ts";
+> 		reg = <0x4a>;
+> 		reset-gpios = <&gpio1 22 GPIO_ACTIVE_LOW>;
+> 		interrupt-parent = <&gpio1>;
+> 		interrupts = <0 IRQ_TYPE_EDGE_FALLING>;
+> 		pinctrl-names = "default";
+> 		pinctrl-0 = <&mxt_int>;
+> 	};
+> 
+> 	ilitek-i2c@41 {
+> 		compatible = "ilitek,i2c";
+> 		reg = <0x41>;
+> 		interrupt-parent = <&gpio1>;
+> 		interrupts = <0 IRQ_TYPE_EDGE_FALLING>;
+> 		ilitek,reset = <&gpio1 22 0x01>;
+> 		key_input_used = <0x01>;
+> 	};
+> 
+> };
+> 
+> &i2c3 {
+> 	status = "okay";
+> 	i2c-scl-rising-time-ns = <160>;
+>         i2c-scl-falling-time-ns = <30>;
+>         clock-frequency = <400000>;
+> 
+> 	apds9960: apds9960@39 {
+> 		compatible = "avago,apds9960";
+> 		reg = <0x39>;
+> 		interrupt-parent = <&gpio1>;
+> 		interrupts = <22 1>;
+> 	};
+> 
+> 	bmp280: bmp280@77 {
+> 		compatible = "bosch,bmp280";
+> 		reg = <0x77>;
+> 	};
+> 
+> 	mpu6050: mpu6050@68 {
+> 		compatible = "invensense,mpu6050";
+> 		reg = <0x36>;
+> 	};
+> 	
+> 	msp430: msp430@48 {
+> 		compatible = "ti,msp430";
+> 		reg = <0x48>;
+> 		msp430,reset = <&gpio1 21 1>;
+> 	};
+954c1025
+< 	enable-gpios = <&gpio4 29 GPIO_ACTIVE_HIGH>;
+---
+> 	enable-gpios = <&gpio1 18 GPIO_ACTIVE_HIGH>;
+1159a1231,1236
+> 	atmel_mxt_ts {
+> 		mxt_int: mxt-pinctrl {
+> 			rockchip,pins = <1 0 RK_FUNC_GPIO &pcfg_pull_up>;
+> 		};	
+> 	};
+> 
+1198c1275,1279
+< 			rockchip,pins = <0 13 RK_FUNC_GPIO &pcfg_pull_none>;
+---
+> 			rockchip,pins = 
+> 			<0 13 RK_FUNC_GPIO &pcfg_pull_none>,
+> 			<1 1 RK_FUNC_GPIO &pcfg_pull_down>,
+> 			<1 3 RK_FUNC_GPIO &pcfg_pull_down>,
+> 			<1 4 RK_FUNC_GPIO &pcfg_pull_down>;
